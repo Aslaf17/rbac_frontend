@@ -101,7 +101,7 @@ export const AttendanceCard = ({ onMarked }) => {
 					: `Signed in as ${user?.username}. Enter the session you're joining to mark yourself present.`}
 			</p>
 
-			<form onSubmit={handleLogin} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+			<form onSubmit={handleLogin} className="mt-4 flex flex-col gap-3 sm:flex-row  sm:items-center">
 				<input
 					type="text"
 					value={studentId}

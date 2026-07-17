@@ -122,7 +122,7 @@ const Session = () => {
 					{canCreate && (
 						<form
 							onSubmit={handleCreate}
-							className="glossy-surface flex flex-col gap-3 rounded-xl border border-line bg-surface p-4"
+							className="glossy-surface flex flex-col gap-3 rounded-xl border   border-line bg-surface p-4"
 						>
 							<label className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
 								Start a session
@@ -133,7 +133,7 @@ const Session = () => {
 									value={titleInput}
 									onChange={(event) => setTitleInput(event.target.value)}
 									placeholder="Session title"
-									className="flex-1 rounded-lg border border-line bg-paper px-3 py-2 text-sm text-fg placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+									className="flex-1 rounded-lg border border-line  bg-paper px-3 py-2 text-sm text-fg placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
 								/>
 								<button
 									type="submit"
@@ -149,7 +149,7 @@ const Session = () => {
 
 					<form
 						onSubmit={handleLoad}
-						className="glossy-surface flex flex-col gap-3 rounded-xl border border-line bg-surface p-4"
+						className="glossy-surface flex flex-col gap-3 rounded-xl border border-line  bg-surface p-4"
 					>
 						<label className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
 							Load a session

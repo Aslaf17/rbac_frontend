@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { KeyRound, User, ArrowRight, ScanFace, AlertCircle } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
-import { ROLE_THEME } from '../roleTheme'
+import { useAuth } from '../../context/AuthContext'
+import { ROLE_THEME } from '../../constants/roleTheme'
 
 const Login = () => {
 

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ShieldAlert, ArrowLeft, LogIn } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { ROLE_THEME } from '../roleTheme'
+import { ROLE_THEME } from '../constants/roleTheme'
 
 const AccessDenied = () => {
 	const { user } = useAuth()

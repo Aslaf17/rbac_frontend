@@ -1,4 +1,4 @@
-export const { StatusBadge } = ({ status }) => {
+export const  StatusBadge = ({ status }) => {
 
 	const statusStyle = (status) => {
 		switch (status) {
