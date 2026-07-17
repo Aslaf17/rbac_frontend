@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, KeyRound, User, ArrowRight, ScanFace, AlertCircle, Check } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
-import { ROLES, ROLE_THEME } from '../roleTheme'
+import { useAuth } from '../../context/AuthContext'
+import { ROLES, ROLE_THEME } from '../../constants/roleTheme'
 
 const Register = () => {
 	const { register } = useAuth()

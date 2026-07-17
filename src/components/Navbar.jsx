@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LogOut, Menu, Moon, ScanFace, Sun, UserCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
-import { ROLE_THEME } from '../roleTheme'
+import { ROLE_THEME } from '../constants/roleTheme'
 import { AccessBadge } from './AccessBadge'
 
 export const Navbar = ({ onMenuClick }) => {
@@ -20,7 +20,7 @@ export const Navbar = ({ onMenuClick }) => {
 	}
 
 	return (
-		<nav className="glossy sticky top-0 z-20 border-b border-line bg-surface/80 backdrop-blur-md">
+		<nav className="glossy sticky top-0 z-20 border-b border-line  bg-surface/80 backdrop-blur-md">
 			<div className="flex items-center justify-between px-4 py-4 sm:px-6">
 				<div className="flex items-center gap-2">
 					{onMenuClick && (
@@ -47,7 +47,7 @@ export const Navbar = ({ onMenuClick }) => {
 						className="flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-fg"
 					>
 						<UserCircle className="h-4 w-4" />
-						<span className="hidden sm:inline">Profile</span>
+						<span className="hidden sm:inline ">Profile</span>
 					</Link>
 
 					<AccessBadge role={user.role} username={user.username} size="mini" />
@@ -57,7 +57,7 @@ export const Navbar = ({ onMenuClick }) => {
 						onClick={toggleTheme}
 						aria-label="Toggle dark mode"
 						title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-						className="glossy-surface flex h-9 w-9 items-center justify-center rounded-lg bg-surface text-muted ring-1 ring-inset ring-line transition-colors hover:text-fg"
+						className="glossy-surface flex h-9 w-9 items-center justify-center rounded-lg bg-surface text-muted  border-line transition-colors hover:text-fg"
 					>
 						{isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
 					</button>

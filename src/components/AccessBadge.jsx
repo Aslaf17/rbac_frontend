@@ -1,4 +1,4 @@
-import { ROLE_THEME } from '../roleTheme'
+import { ROLE_THEME } from '../constants/roleTheme'
 
 export const AccessBadge = ({ role, username, size = 'full' }) => {
 	const theme = ROLE_THEME[role]
@@ -11,7 +11,7 @@ export const AccessBadge = ({ role, username, size = 'full' }) => {
 					className="flex h-6 w-6 items-center justify-center rounded-full"
 					style={{ backgroundColor: theme.color }}
 				>
-					<Icon className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+					<Icon className="h-3.5 w-3.5 text-white " strokeWidth={2.5} />
 				</div>
 				<span className="font-mono text-[11px] font-semibold tracking-wide text-fg">
 					{theme.code}
@@ -21,7 +21,7 @@ export const AccessBadge = ({ role, username, size = 'full' }) => {
 	}
 
 	return (
-		<div className="relative overflow-hidden rounded-2xl bg-ink text-white shadow-xl shadow-black/10">
+		<div className="relative overflow-hidden rounded-2xl bg-ink text-white border-line shadow-xl shadow-black/10">
 			<div className="absolute inset-y-0 left-0 w-2" style={{ backgroundColor: theme.color }} />
 
 			<div className="flex items-start justify-between p-6 pl-8">

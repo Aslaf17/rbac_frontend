@@ -5,7 +5,7 @@ import { AppLayout } from './AppLayout'
 import { AccessBadge } from './AccessBadge'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axiosConfig'
-import { ROLE_THEME } from '../roleTheme'
+import { ROLE_THEME } from '../constants/roleTheme'
 
 export const DashboardShell = ({ role, endpoint, description, cards, actions = [] }) => {
 	const { user } = useAuth()
