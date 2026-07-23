@@ -142,7 +142,7 @@ const Attendance = () => {
 				</form>
 
 				{error && (
-					<div className="mt-6 flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-900">
+					<div className="mt-6 flex items-start gap-2 rounded-lg bg-red-200 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-200 dark:ring-red-900">
 						<AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
 						<span>{error}</span>
 					</div>
