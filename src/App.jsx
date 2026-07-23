@@ -16,7 +16,8 @@ import Whiteboard from './pages/Whiteboard/Whiteboard'
 import Session from './pages/Session/Session'
 import ChatWidget from './components/chatComponents/ChatWidget'
 import { ROLE_THEME } from './constants/roleTheme'
-
+import ClassroomList from './pages/classroom/ClassroomList'
+import ClassroomRoom from './pages/classroom/ClassroomRoom'
 export default function App() {
 	const { user, loading } = useAuth()
 
@@ -50,7 +51,8 @@ export default function App() {
 				<Route path="/attendance" element={ <ProtectedRoute allowedRoles={['TEACHER', 'STUDENT', 'ADMIN']}> <Attendance /> </ProtectedRoute> } />
 				<Route path="/whiteboard" element={ <ProtectedRoute> <Whiteboard /> </ProtectedRoute> } />
 				<Route path="/session" element={ <ProtectedRoute> <Session /> </ProtectedRoute> } />
-
+				<Route path="/classroom" element={ <ProtectedRoute> <ClassroomList /> </ProtectedRoute> } />
+				<Route path="/classroom/:sessionId" element={ <ProtectedRoute> <ClassroomRoom /> </ProtectedRoute> } />
 				<Route path="*" element={<Navigate to="/" replace />} />
 			</Routes>
 			{user && <ChatWidget />}

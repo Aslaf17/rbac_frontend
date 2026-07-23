@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CalendarCheck, PenSquare, Radio, ScanFace, X } from 'lucide-react'
+import { LayoutDashboard, CalendarCheck, PenSquare, Radio, ScanFace, X, Presentation } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { ROLE_THEME } from '../constants/roleTheme'
 
@@ -13,6 +13,7 @@ export const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
 
 	const items = [
 		{ label: 'Dashboard', to: theme.path, icon: LayoutDashboard, match: theme.path },
+		{ label: 'Classroom', to: '/classroom', icon: Presentation, match: '/classroom' },
 		{ label: 'Attendance', to: '/attendance', icon: CalendarCheck, match: '/attendance' },
 		{ label: 'Whiteboard', to: '/whiteboard', icon: PenSquare, match: '/whiteboard' },
 		{ label: 'Session', to: '/session', icon: Radio, match: '/session' },
