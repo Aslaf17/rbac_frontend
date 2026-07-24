@@ -30,10 +30,9 @@ const useMeetingDuration = (startedAt) => {
 }
 
 const RoomShell = () => {
-	const navigate = useNavigate()
-	const { session, connectionStatus, joinRoom, leaveRoom, toggleMic, toggleCamera, isTrainer, lockRoom, unlockRoom } = useClassroom()
 
-	const [localStream, setLocalStream] = useState(null)
+	const navigate = useNavigate()
+	const { session, connectionStatus, joinRoom, leaveRoom, toggleMic, toggleCamera, isTrainer, lockRoom, unlockRoom, livekitRoom } = useClassroom()
 	const [micOn, setMicOn] = useState(false)
 	const [camOn, setCamOn] = useState(false)
 	const [screenSharing, setScreenSharing] = useState(false)
@@ -49,6 +48,9 @@ const RoomShell = () => {
 	const duration = useMeetingDuration(session?.startedAt)
 
 	const joinedRef = useRef(false)
+	const mediaRecorderRef = useRef(null)
+	const recordedChunksRef = useRef([])
+	const recordingStreamRef = useRef(null)
 
 	useEffect(() => {
 
@@ -56,55 +58,97 @@ const RoomShell = () => {
 
 		joinedRef.current = true
 
-		joinRoom().catch(console.error)
-
+		joinRoom().catch(() => {
+			navigate('/classroom')
+		})
 		return () => {
-
 			leaveRoom().catch(console.error)
-
 		}
 
-	}, [joinRoom, leaveRoom])
+	}, [joinRoom, leaveRoom, navigate])
 
 	const handleToggleMic = async () => {
 		try {
+			await livekitRoom?.localParticipant.setMicrophoneEnabled(!micOn)
 			await toggleMic(!micOn)
 			setMicOn((v) => !v)
 		} catch {
-			/* surfaced via toast in ClassroomContext for trainer-restricted cases */
+			/* mic permission denied */
 		}
 	}
 
 	const handleToggleCam = async () => {
 		try {
 			if (!camOn) {
-				const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-				setLocalStream((prev) => {
-					prev?.getTracks().forEach((t) => t.stop())
-					return stream
-				})
+				await livekitRoom?.localParticipant.setCameraEnabled(true)
 			} else {
-				localStream?.getTracks().forEach((t) => t.stop())
-				setLocalStream(null)
+				await livekitRoom?.localParticipant.setCameraEnabled(false)
 			}
 			await toggleCamera(!camOn)
 			setCamOn((v) => !v)
-		} catch {
-			/* camera permission denied, etc. */
+		} catch (err) {
+			console.error('Camera toggle failed:', err)
 		}
 	}
 
 	const handleToggleScreenShare = async () => {
 		try {
 			if (!screenSharing) {
-				const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
-				stream.getVideoTracks()[0].onended = () => setScreenSharing(false)
+				await livekitRoom?.localParticipant.setScreenShareEnabled(true)
 				setScreenSharing(true)
 			} else {
+				await livekitRoom?.localParticipant.setScreenShareEnabled(false)
 				setScreenSharing(false)
 			}
 		} catch {
 			/* user cancelled the share picker */
+		}
+	}
+
+	const handleToggleRecording = async () => {
+		if (!recording) {
+			try {
+				const stream = await navigator.mediaDevices.getDisplayMedia({
+					video: true,
+					audio: true,
+				})
+				recordingStreamRef.current = stream
+				recordedChunksRef.current = []
+
+				const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' })
+				recorder.ondataavailable = (e) => {
+					if (e.data.size > 0) recordedChunksRef.current.push(e.data)
+				}
+				recorder.onstop = () => {
+					const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' })
+					const url = URL.createObjectURL(blob)
+					const a = document.createElement('a')
+					a.href = url
+					a.download = `${session?.title || 'classroom-recording'}-${Date.now()}.webm`
+					document.body.appendChild(a)
+					a.click()
+					a.remove()
+					URL.revokeObjectURL(url)
+					recordingStreamRef.current?.getTracks().forEach((t) => t.stop())
+					recordingStreamRef.current = null
+				}
+
+				stream.getVideoTracks()[0].onended = () => {
+					if (mediaRecorderRef.current?.state === 'recording') {
+						mediaRecorderRef.current.stop()
+					}
+					setRecording(false)
+				}
+
+				recorder.start()
+				mediaRecorderRef.current = recorder
+				setRecording(true)
+			} catch (err) {
+				console.error('Failed to start recording', err)
+			}
+		} else {
+			mediaRecorderRef.current?.stop()
+			setRecording(false)
 		}
 	}
 
@@ -176,7 +220,7 @@ const RoomShell = () => {
 			<div className="flex min-h-0 flex-1">
 				<div className="relative flex min-w-0 flex-3 flex-col gap-3 p-4">
 					<div className="min-h-0 flex-1">
-						<VideoGrid localStream={localStream} />
+						<VideoGrid /> 
 					</div>
 					<div className="flex justify-center">
 						<MeetingControls
@@ -193,7 +237,7 @@ const RoomShell = () => {
 							participantsOpen={participantsOpen}
 							onToggleParticipants={() => setParticipantsOpen((v) => !v)}
 							recording={recording}
-							onToggleRecording={() => setRecording((v) => !v)}
+							onToggleRecording={handleToggleRecording}
 							onOpenSettings={() => {}}
 							onLeave={handleLeave}
 						/>

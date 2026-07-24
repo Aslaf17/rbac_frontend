@@ -5,6 +5,7 @@ import * as ClassroomApi from '../api/ClassroomApi'
 import { getSessionMessages, sendMessage as sendChatMessage } from '../api/ChatApi'
 import { getSession } from '../api/SessionApi'
 import { normalizeMessage } from '../constants/ChatHelpers'
+import { Room, RoomEvent, Track } from 'livekit-client'
 
 const ClassroomContext = createContext(null)
 
@@ -18,6 +19,9 @@ export const ClassroomProvider = ({ sessionId, children }) => {
 	const [waitingList, setWaitingList] = useState([])
 	const [connectionStatus, setConnectionStatus] = useState('connecting') 
 	const [toasts, setToasts] = useState([])
+	const [livekitRoom, setLivekitRoom] = useState(null)
+	const [remoteTracks, setRemoteTracks] = useState({}) // { [identity]: { videoTrack, audioTrack, screenTrack } }
+	const roomRef = useRef(null)
 
 	const me = participants.find(
         p => p.userName === user?.username
@@ -161,20 +165,105 @@ export const ClassroomProvider = ({ sessionId, children }) => {
 	}, [sessionId, refreshParticipants, refreshHands, refreshWaitingList, pushToast])
 
 	const joinRoom = useCallback(async () => {
+		try {
+			await ClassroomApi.requestJoinClassroom(sessionId)
+			await refreshParticipants()
+		} catch (e) {
+			console.error(e)
+			const msg = e?.response?.data?.message || 'Unable to join the classroom. Please try again.'
+			pushToast(msg, 'error')
+			throw e
+		}
+	}, [sessionId, refreshParticipants, pushToast])
 
-        try {
+	useEffect(() => {
+		if (!sessionId || !user) return
 
-            await ClassroomApi.requestJoinClassroom(sessionId)
+		let cancelled = false
+		const room = new Room()
+		roomRef.current = room
 
-            await refreshParticipants()
+		const attachTrack = (identity, kind, track) => {
+			setRemoteTracks((prev) => ({
+				...prev,
+				[identity]: { ...prev[identity], [kind]: track },
+			}))
+		}
 
-        } catch (e) {
+		const detachTrack = (identity, kind) => {
+			setRemoteTracks((prev) => {
+				const next = { ...prev }
+				if (next[identity]) {
+					next[identity] = { ...next[identity], [kind]: null }
+				}
+				return next
+			})
+		}
 
-            console.error(e)
+		room
+			.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+				const kind =
+					track.source === Track.Source.ScreenShare
+						? 'screenTrack'
+						: track.kind === 'video'
+						? 'videoTrack'
+						: 'audioTrack'
+				attachTrack(participant.identity, kind, track)
+			})
+			.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+				const kind =
+					track.source === Track.Source.ScreenShare
+						? 'screenTrack'
+						: track.kind === 'video'
+						? 'videoTrack'
+						: 'audioTrack'
+				detachTrack(participant.identity, kind)
+			})
+			.on(RoomEvent.LocalTrackPublished, (publication, participant) => {
+				const track = publication.track
+				if (!track) return
+				const kind =
+					track.source === Track.Source.ScreenShare
+						? 'screenTrack'
+						: track.kind === 'video'
+						? 'videoTrack'
+						: 'audioTrack'
+				attachTrack(participant.identity, kind, track)
+			})
+			.on(RoomEvent.LocalTrackUnpublished, (publication, participant) => {
+				const track = publication.track
+				if (!track) return
+				const kind =
+					track.source === Track.Source.ScreenShare
+						? 'screenTrack'
+						: track.kind === 'video'
+						? 'videoTrack'
+						: 'audioTrack'
+				detachTrack(participant.identity, kind)
+			})
+			.on(RoomEvent.ParticipantDisconnected, (participant) => {
+				setRemoteTracks((prev) => {
+					const next = { ...prev }
+					delete next[participant.identity]
+					return next
+				})
+			})
 
-        }
+		ClassroomApi.getLiveKitToken(sessionId)
+			.then(({ token }) => room.connect(import.meta.env.VITE_LIVEKIT_URL, token))
+			.then(() => {
+				if (!cancelled) setLivekitRoom(room)
+			})
+			.catch((e) => console.error('LiveKit connect failed', e))
 
-    }, [sessionId, refreshParticipants])
+		return () => {
+			cancelled = true
+			room.disconnect()
+			roomRef.current = null
+			setLivekitRoom(null)
+			setRemoteTracks({})
+		}
+	}, [sessionId, user])
 
 	const leaveRoom = useCallback(async () => {
         
@@ -254,6 +343,8 @@ export const ClassroomProvider = ({ sessionId, children }) => {
 		unlockRoom,
 		sendChat,
 		pushToast,
+		livekitRoom,
+		remoteTracks,
 	}
 
 	return <ClassroomContext.Provider value={value}>{children}</ClassroomContext.Provider>

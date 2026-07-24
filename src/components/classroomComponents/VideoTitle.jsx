@@ -1,26 +1,51 @@
 import { useEffect, useRef } from 'react'
-import { Mic, MicOff,  VideoOff, MoreVertical } from 'lucide-react'
+import { Mic, MicOff, VideoOff, MoreVertical } from 'lucide-react'
 
-export const VideoTile = ({ participant, stream, isLocal = false, isSpeaking = false, large = false }) => {
+export const VideoTile = ({ participant, tracks, isLocal = false, isSpeaking = false }) => {
 	const videoRef = useRef(null)
+	const audioRef = useRef(null)
+	const videoTrack = tracks?.screenTrack || tracks?.videoTrack
+	const audioTrack = tracks?.audioTrack
 
 	useEffect(() => {
-		if (videoRef.current && stream) {
-			videoRef.current.srcObject = stream
-		}
-	}, [stream])
+		const videoElement = videoRef.current
 
-	const cameraOn = participant?.cameraStatus === 'ON'
+		if (videoElement && videoTrack) {
+			videoTrack.attach(videoElement)
+
+			return () => {
+				videoTrack.detach(videoElement)
+			}
+		}
+	}, [videoTrack])
+
+	useEffect(() => {
+		if (isLocal) return
+
+		const audioElement = audioRef.current
+
+		if (audioElement && audioTrack) {
+			audioTrack.attach(audioElement)
+
+			return () => {
+				audioTrack.detach(audioElement)
+			}
+		}
+	}, [audioTrack, isLocal])
+
+	const cameraOn = !!videoTrack
 	const micOn = participant?.micStatus === 'UNMUTED'
 	const initials = (participant?.userName || '?').slice(0, 2).toUpperCase()
 
 	return (
 		<div
-			className={`group relative flex items-center justify-center overflow-hidden rounded-2xl border transition-all ${
+			className={`group relative flex items-center justify-center overflow-hidden rounded-2xl border transition-all h-full w-full ${
 				isSpeaking ? 'border-emerald-400 shadow-[0_0_0_2px_rgba(16,185,129,0.35)]' : 'border-line'
-			} bg-surface-2 ${large ? 'aspect-video' : 'aspect-video'}`}
+			} bg-surface-2`}
 		>
-			{cameraOn && stream ? (
+			{!isLocal && <audio ref={audioRef} autoPlay />}
+
+			{cameraOn ? (
 				<video ref={videoRef} autoPlay playsInline muted={isLocal} className="h-full w-full object-cover" />
 			) : (
 				<div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-linear-to-br from-surface-2 to-surface">
