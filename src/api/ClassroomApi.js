@@ -60,3 +60,6 @@ export const rejectWaiting = (sessionId, participantId) =>
 
 // Activity log
 export const getActivityLog = (sessionId) => api.get(`/session/${sessionId}/logs`).then((r) => r.data)
+
+export const getLiveKitToken = (sessionId) =>
+	api.get(`/session/${sessionId}/livekit-token`).then((r) => r.data)
